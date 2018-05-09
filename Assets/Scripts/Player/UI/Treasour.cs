@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using XLua;
 /// <summary>
 /// 宝藏
 /// </summary>
+[Hotfix]
 public class Treasour : MonoBehaviour
 {
 
