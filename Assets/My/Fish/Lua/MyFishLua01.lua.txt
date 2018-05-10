@@ -1,17 +1,55 @@
+local UnityEngine = CS.UnityEngine;
+local GameObject = UnityEngine.GameObject;
+local Vector3 = UnityEngine.Vector3;
+local Quaternion = UnityEngine.Quaternion;
 
-local GameObject = CS.UnityEngine.GameObject;
-local Vector3 = CS.UnityEngine.Vector3;
+function HotFix()
+    --1.1 点击宝箱的金币钻石太拥挤分散一点
+    xlua.hotfix(CS.Treasour, 'CreatePrize', CreatePrize);
+    --1.1 玩家金币钻石不够时没有相应处理
+    xlua.private_accessible(CS.Gun);
+    xlua.hotfix(CS.Gun, 'Attack', Attack);
+end
 
---1.1 点击宝箱的金币钻石太拥挤分散一点
-xlua.hotfix(CS.Treasour, 'CreatePrize',
-    function (self)
-    	print("HotFix ： CreatePrize");
-        for i = 1, 5, 1 do
-            local go = GameObject.Instantiate(self.gold, self.transform.position + Vector3(-10 + i * 30, 0, 0), self.transform.rotation);
-            go.transform:SetParent(self.cavas);
-            local go1 = GameObject.Instantiate(self.diamands, self.transform.position + Vector3(0, 30, 0) + Vector3(-10 + i * 30, 0, 0), self.transform.rotation);
-            go1.transform:SetParent(self.cavas);
+CreatePrize = function (self)
+    print("HotFix ： CreatePrize");
+    for i = 1, 5, 1 do
+        local go = GameObject.Instantiate(self.gold, self.transform.position + Vector3(-10 + i * 40, 0, 0), self.transform.rotation);
+        go.transform:SetParent(self.cavas);
+        local go1 = GameObject.Instantiate(self.diamands, self.transform.position + Vector3(0, 40, 0) + Vector3(-10 + i * 40, 0, 0), self.transform.rotation);
+        go1.transform:SetParent(self.cavas);
+    end
+end
+
+Attack = function (self)
+    
+    if UnityEngine.Input.GetMouseButtonDown(0) then
+        print("HotFix ： Attack");
+        
+        if self.gold == 0 or self.gold < -1 - (self.gunLevel - 1) * 2 then
+            return
         end
-    end);
+        
+        self.bullectAudio.clip = self.bullectAudios[self.gunLevel - 1];
+        self.bullectAudio:Play();
+        
+        if self.Butterfly then
+            GameObject.Instantiate(self.Bullects[self.gunLevel - 1], self.attackPos.position, self.attackPos.rotation * Quaternion.Euler(0, 0, 20));
+            GameObject.Instantiate(self.Bullects[self.gunLevel - 1], self.attackPos.position, self.attackPos.rotation * Quaternion.Euler(0, 0, -20));
+        end
+        
+        GameObject.Instantiate(self.Bullects[self.gunLevel - 1], self.attackPos.position, self.attackPos.rotation);
+        
+        if not self.canShootForFree then
+            self:GoldChange(-1 - (self.gunLevel - 1) * 2);
+        end
+        self.attackCD = 0;
+        self.attack = false;
+    end
+end
 
-   
+function Dispose()
+    print("HotFix ： Dispose");
+    xlua.hotfix(CS.Treasour, 'CreatePrize', nil);
+    xlua.hotfix(CS.Gun, 'Attack', nil);
+end
