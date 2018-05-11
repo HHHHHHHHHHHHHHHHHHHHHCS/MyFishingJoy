@@ -3,16 +3,25 @@ local GameObject = UnityEngine.GameObject;
 local Vector3 = UnityEngine.Vector3;
 local Quaternion = UnityEngine.Quaternion;
 
-function HotFix()
+function HotFix(isDispose)
     --1.1 点击宝箱的金币钻石太拥挤分散一点
-    xlua.hotfix(CS.Treasour, 'CreatePrize', CreatePrize);
+    xlua.hotfix(CS.Treasour, 'CreatePrize', isDispose and Treasour_CreatePrize or nil);
     --1.1 玩家金币钻石不够时没有相应处理
     xlua.private_accessible(CS.Gun);
-    xlua.hotfix(CS.Gun, 'Attack', Attack);
+    xlua.hotfix(CS.Gun, 'Attack', isDispose and Gun_Attack or nil);
+
+    --1.2 修改技能消耗的钻石数量过多
+    xlua.private_accessible(CS.ButterFly);
+    xlua.hotfix(CS.ButterFly, 'Start', isDispose and ButterFly_Start or nil);
+    xlua.private_accessible(CS.Ice);
+    xlua.hotfix(CS.Ice, 'Start', isDispose and Ice_Start or nil);
+    xlua.private_accessible(CS.Fire);
+    xlua.hotfix(CS.Fire, 'Start', isDispose and Fire_Start or nil);
+    
 end
 
-CreatePrize = function (self)
-    print("HotFix ： CreatePrize");
+Treasour_CreatePrize = function (self)
+    print("HotFix ： Treasour_CreatePrize");
     for i = 1, 5, 1 do
         local go = GameObject.Instantiate(self.gold, self.transform.position + Vector3(-10 + i * 40, 0, 0), self.transform.rotation);
         go.transform:SetParent(self.cavas);
@@ -21,10 +30,14 @@ CreatePrize = function (self)
     end
 end
 
-Attack = function (self)
+Gun_Attack = function (self)
     
     if UnityEngine.Input.GetMouseButtonDown(0) then
-        print("HotFix ： Attack");
+        
+        if UnityEngine.EventSystems.EventSystem.current:IsPointerOverGameObject() then
+            return
+        end
+        print("HotFix ： Gun_Attack");
         
         if self.gold == 0 or self.gold < -1 - (self.gunLevel - 1) * 2 then
             return
@@ -48,8 +61,14 @@ Attack = function (self)
     end
 end
 
-function Dispose()
-    print("HotFix ： Dispose");
-    xlua.hotfix(CS.Treasour, 'CreatePrize', nil);
-    xlua.hotfix(CS.Gun, 'Attack', nil);
+ButterFly_Start = function (self)
+    self.reduceDiamands = 5;
+end
+
+Ice_Start = function (self)
+    self.reduceDiamands = 9;
+end
+
+Fire_Start = function (self)
+    self.reduceDiamands = 7;
 end

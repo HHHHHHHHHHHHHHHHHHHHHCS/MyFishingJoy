@@ -16,7 +16,7 @@ public class MyFishLua01 : MonoBehaviour
         luaEnv = new XLua.LuaEnv();
         luaEnv.AddLoader(MyLoader);
         luaEnv.DoString("require 'MyFishLua01'");
-        luaEnv.DoString("HotFix();");
+        luaEnv.DoString("HotFix(true);");
     }
 
     private byte[] MyLoader(ref string filepath)
@@ -30,7 +30,7 @@ public class MyFishLua01 : MonoBehaviour
 
     private void OnDestroy()
     {
-        luaEnv.DoString("Dispose()");
+        luaEnv.DoString("HotFix(false)");
         luaEnv.Dispose();
     }
 }
