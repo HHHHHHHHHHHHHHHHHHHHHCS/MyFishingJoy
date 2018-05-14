@@ -14,8 +14,9 @@ public class MyFishLua01 : MonoBehaviour
     private void Awake()
     {
         luaEnv = new XLua.LuaEnv();
+        luaEnv.DoString("require 'xlua.util';");
         luaEnv.AddLoader(MyLoader);
-        luaEnv.DoString("require 'MyFishLua01'");
+        luaEnv.DoString("require 'MyFishLua01';");
         luaEnv.DoString("HotFix(true);");
     }
 
