@@ -238,7 +238,7 @@ public class Gun : MonoBehaviour
     }
 
     //增减金钱
-
+    [LuaCallCSharp]
     public void GoldChange(int number)
     {
         if (canGetDoubleGold)
@@ -254,7 +254,7 @@ public class Gun : MonoBehaviour
     }
 
     //增减钻石
-
+    [LuaCallCSharp]
     public void DiamandsChange(int number)
     {
 

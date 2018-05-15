@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class MyFishLua01 : MonoBehaviour
+public class MyFishLua02 : MonoBehaviour
 {
     private const string fileDir = "My/Fish/Lua";
     private const string filePath = "MyFishLua01.lua.txt";
