@@ -4,6 +4,9 @@ local UnityEngine = CS.UnityEngine;
 local GameObject = UnityEngine.GameObject;
 local Vector3 = UnityEngine.Vector3;
 local Quaternion = UnityEngine.Quaternion;
+local Mathf = UnityEngine.Mathf;
+local Time = UnityEngine.Time;
+local Random = UnityEngine.Random;
 
 function HotFix(isHotfix)
     
@@ -46,6 +49,9 @@ function HotFix(isHotfix)
         xlua.hotfix(CS.Gun, 'DiamandsChange', nil);
     end
     
+    --1.3.3 鱼过多
+    xlua.private_accessible(CS.CreateFish);
+    xlua.hotfix(CS.CreateFish, 'Update', isHotfix and CreateFish_Update or nil);
 end
 
 Treasour_CreatePrize = function (self)
@@ -137,3 +143,52 @@ Gun_DiamandsChange = function (self, number)
         return;
     end
 end
+
+CreateFish_Update = function (self)
+    
+    self:CreateALotOfFish();
+    
+    if self.ItemtimeVal >= 0.5 then
+        
+        self.num = Random.Range(0, 4);
+        self.ItemNum = Random.Range(1, 101);
+        
+        local halfLength = self.fishList.Length / 2
+        local littlefishTypeIndex = UnityEngine.Mathf.Floor(UnityEngine.Random.Range(0, halfLength))
+        local bigfishTypeIndex = UnityEngine.Mathf.Floor(UnityEngine.Random.Range(halfLength, self.fishList.Length))
+        local itemTypeIndex = UnityEngine.Mathf.Floor(UnityEngine.Random.Range(0, self.item.Length))
+        
+        if self.ItemNum < 20 then
+            self:CreateGameObject(item[3]);
+            self:CreateGameObject(fishList[6]);
+        end
+        
+        if self.ItemNum <= 42 then
+            self:CreateGameObject(self.fishList[0]);
+            self:CreateGameObject(self.item[0]);
+            self:CreateGameObject(self.fishList[3]);
+            self:CreateGameObject(self.item[0]);
+        elseif self.ItemNum >= 43 and self.ItemNum < 72 then
+            self:CreateGameObject(self.fishList[1]);
+            self:CreateGameObject(self.item[0]);
+            self:CreateGameObject(self.fishList[4]);
+        elseif self.ItemNum >= 73 and self.ItemNum < 84 then
+            self:CreateGameObject(self.fishList[2]);
+            self:CreateGameObject(self.fishList[5]);
+        elseif self.ItemNum >= 94 and self.ItemNum <= 98 then
+            self:CreateGameObject(self.item[1]);
+        elseif self.ItemNum >= 84 and self.ItemNum < 86 then
+            self:CreateGameObject(self.boss2);
+        elseif self.ItemNum > 98 and self.ItemNum < 100 then
+            self:CreateGameObject(self.item[2]);
+            self:CreateGameObject(self.boss);
+        else
+            self:CreateGameObject(self.item[0]);
+            self:CreateGameObject(self.boss3);
+        end
+        self.ItemtimeVal = 0;
+    else
+        self.ItemtimeVal = self.ItemtimeVal + Time.deltaTime;
+    end
+end
+
