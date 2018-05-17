@@ -52,6 +52,9 @@ function HotFix(isHotfix)
     --1.3.3 鱼过多
     xlua.private_accessible(CS.CreateFish);
     xlua.hotfix(CS.CreateFish, 'Update', isHotfix and CreateFish_Update or nil);
+    
+    --1.4.1 扑鱼是考虑了鱼的血量与子弹的伤害来模拟概率，这样玩家体验不好，要使用传统的概率来扑鱼。
+    xlua.hotfix(CS.Fish, 'TakeDamage', isHotfix and Fish_TakeDamage or nil);
 end
 
 Treasour_CreatePrize = function (self)
@@ -192,3 +195,20 @@ CreateFish_Update = function (self)
     end
 end
 
+Fish_TakeDamage = function (self, attackValue)
+    if CS.Gun.Instance.Fire then
+        attackValue = 2 * attackValue;
+    end
+    local catchValue = Mathf.Floor(Random.Range(0, 100));
+    
+    if catchValue <= (50 - (self.hp - attackValue)) / 2 then
+        
+        self.isDead = true;
+        for i = 0, 8, 1 do
+            GameObject.Instantiate(self.pao, self.transform.position, Quaternion.Euler(self.transform.eulerAngles + Vector3(0, 45 * i, 0)));
+        end
+        
+        self.gameObjectAni:SetTrigger("Die");
+        self:Invoke("Prize", 0.7);
+    end
+end
