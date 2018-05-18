@@ -1,69 +1,76 @@
-local util = require 'xlua.util';
+local util = require 'xlua.util'
 
-local UnityEngine = CS.UnityEngine;
-local GameObject = UnityEngine.GameObject;
-local Vector3 = UnityEngine.Vector3;
-local Quaternion = UnityEngine.Quaternion;
-local Mathf = UnityEngine.Mathf;
-local Time = UnityEngine.Time;
-local Random = UnityEngine.Random;
+local UnityEngine = CS.UnityEngine
+local GameObject = UnityEngine.GameObject
+local Vector3 = UnityEngine.Vector3
+local Quaternion = UnityEngine.Quaternion
+local Mathf = UnityEngine.Mathf
+local Time = UnityEngine.Time
+local Random = UnityEngine.Random
 
 function HotFix(isHotfix)
     
     --1.1.1 点击宝箱的金币钻石太拥挤分散一点
-    xlua.hotfix(CS.Treasour, 'CreatePrize', isHotfix and Treasour_CreatePrize or nil);
+    xlua.hotfix(CS.Treasour, 'CreatePrize', isHotfix and Treasour_CreatePrize or nil)
     --1.1.2 玩家金币钻石不够时没有相应处理
     --1.2.1 与UI交互时不能发射子弹。
     --1.3.2 炮台3太强，且钻石没用处，不削弱，只有氪金才可使用
-    xlua.private_accessible(CS.Gun);
-    xlua.hotfix(CS.Gun, 'Attack', isHotfix and Gun_Attack or nil);
+    xlua.private_accessible(CS.Gun)
+    xlua.hotfix(CS.Gun, 'Attack', isHotfix and Gun_Attack or nil)
     
     --1.2.2 修改技能消耗的钻石数量过多
-    xlua.private_accessible(CS.ButterFly);
-    xlua.hotfix(CS.ButterFly, 'Start', isHotfix and ButterFly_Start or nil);
-    xlua.private_accessible(CS.Ice);
-    xlua.hotfix(CS.Ice, 'Start', isHotfix and Ice_Start or nil);
-    xlua.private_accessible(CS.Fire);
-    xlua.hotfix(CS.Fire, 'Start', isHotfix and Fire_Start or nil);
+    xlua.private_accessible(CS.ButterFly)
+    xlua.hotfix(CS.ButterFly, 'Start', isHotfix and ButterFly_Start or nil)
+    xlua.private_accessible(CS.Ice)
+    xlua.hotfix(CS.Ice, 'Start', isHotfix and Ice_Start or nil)
+    xlua.private_accessible(CS.Fire)
+    xlua.hotfix(CS.Fire, 'Start', isHotfix and Fire_Start or nil)
     
     --1.2.3 Boss撞击玩家数值变动一样且不是减少而是增加的BUG
     if isHotfix then
-        xlua.private_accessible(CS.Boss);
-        util.hotfix_ex(CS.Boss, 'Start', Boss_Start);
-        xlua.private_accessible(CS.DeffendBoss);
-        util.hotfix_ex(CS.DeffendBoss, 'Start', DeffendBoss_Start);
-        xlua.private_accessible(CS.InvisibleBoss);
-        util.hotfix_ex(CS.InvisibleBoss, 'Start', InvisibleBoss_Start);
+        xlua.private_accessible(CS.Boss)
+        util.hotfix_ex(CS.Boss, 'Start', Boss_Start)
+        xlua.private_accessible(CS.DeffendBoss)
+        util.hotfix_ex(CS.DeffendBoss, 'Start', DeffendBoss_Start)
+        xlua.private_accessible(CS.InvisibleBoss)
+        util.hotfix_ex(CS.InvisibleBoss, 'Start', InvisibleBoss_Start)
     else
-        xlua.hotfix(CS.Boss, 'Start', nil);
-        xlua.hotfix(CS.DeffendBoss, 'Start', nil);
-        xlua.hotfix(CS.InvisibleBoss, 'Start', nil);
+        xlua.hotfix(CS.Boss, 'Start', nil)
+        xlua.hotfix(CS.DeffendBoss, 'Start', nil)
+        xlua.hotfix(CS.InvisibleBoss, 'Start', nil)
     end
     
     --1.3.1 boss撞击玩家当钻石金币不够时会产生负数
     if isHotfix then
-        util.hotfix_ex(CS.Gun, 'GoldChange', Gun_GoldChange);
-        util.hotfix_ex(CS.Gun, 'DiamandsChange', Gun_DiamandsChange);
+        util.hotfix_ex(CS.Gun, 'GoldChange', Gun_GoldChange)
+        util.hotfix_ex(CS.Gun, 'DiamandsChange', Gun_DiamandsChange)
     else
-        xlua.hotfix(CS.Gun, 'GoldChange', nil);
-        xlua.hotfix(CS.Gun, 'DiamandsChange', nil);
+        xlua.hotfix(CS.Gun, 'GoldChange', nil)
+        xlua.hotfix(CS.Gun, 'DiamandsChange', nil)
     end
     
     --1.3.3 鱼过多
-    xlua.private_accessible(CS.CreateFish);
-    xlua.hotfix(CS.CreateFish, 'Update', isHotfix and CreateFish_Update or nil);
+    xlua.private_accessible(CS.CreateFish)
+    xlua.hotfix(CS.CreateFish, 'Update', isHotfix and CreateFish_Update or nil)
     
     --1.4.1 扑鱼是考虑了鱼的血量与子弹的伤害来模拟概率，这样玩家体验不好，要使用传统的概率来扑鱼。
-    xlua.hotfix(CS.Fish, 'TakeDamage', isHotfix and Fish_TakeDamage or nil);
+    xlua.private_accessible(CS.Fish)
+    xlua.hotfix(CS.Fish, 'TakeDamage', isHotfix and Fish_TakeDamage or nil)
+    xlua.hotfix(CS.Boss, 'TakeDamage', isHotfix and Boss_TakeDamage or nil)
+    
+    -- 1.4.2 炮台移动是根据鼠标的水平数值滑动来模拟跟随的，改为玩家按下ad键来旋转炮台
+    xlua.hotfix(CS.Gun, 'RotateGun', isHotfix and Gun_RotateGun or nil)
+    xlua.private_accessible(CS.GunImage)
+    xlua.hotfix(CS.GunImage, 'RotateGun', isHotfix and GunImage_RotateGun or nil)
 end
 
 Treasour_CreatePrize = function (self)
-    print("HotFix ： Treasour_CreatePrize");
+    print("HotFix ： Treasour_CreatePrize")
     for i = 1, 5, 1 do
-        local go = GameObject.Instantiate(self.gold, self.transform.position + Vector3(-10 + i * 40, 0, 0), self.transform.rotation);
-        go.transform:SetParent(self.cavas);
-        local go1 = GameObject.Instantiate(self.diamands, self.transform.position + Vector3(0, 40, 0) + Vector3(-10 + i * 40, 0, 0), self.transform.rotation);
-        go1.transform:SetParent(self.cavas);
+        local go = GameObject.Instantiate(self.gold, self.transform.position + Vector3(-10 + i * 40, 0, 0), self.transform.rotation)
+        go.transform:SetParent(self.cavas)
+        local go1 = GameObject.Instantiate(self.diamands, self.transform.position + Vector3(0, 40, 0) + Vector3(-10 + i * 40, 0, 0), self.transform.rotation)
+        go1.transform:SetParent(self.cavas)
     end
 end
 
@@ -74,87 +81,87 @@ Gun_Attack = function (self)
         if UnityEngine.EventSystems.EventSystem.current:IsPointerOverGameObject() then
             return
         end
-        print("HotFix ： Gun_Attack");
+        print("HotFix ： Gun_Attack")
         
         if self.gun_Level == 3 and self.diamands < 3 then
-            return;
+            return
         elseif self.gun_Level ~= 3 and (self.gold == 0 or self.gold < -1 - (self.gunLevel - 1) * 2)then
             return
         end
         
-        self.bullectAudio.clip = self.bullectAudios[self.gunLevel - 1];
-        self.bullectAudio:Play();
+        self.bullectAudio.clip = self.bullectAudios[self.gunLevel - 1]
+        self.bullectAudio:Play()
         
         if self.Butterfly then
-            GameObject.Instantiate(self.Bullects[self.gunLevel - 1], self.attackPos.position, self.attackPos.rotation * Quaternion.Euler(0, 0, 20));
-            GameObject.Instantiate(self.Bullects[self.gunLevel - 1], self.attackPos.position, self.attackPos.rotation * Quaternion.Euler(0, 0, -20));
+            GameObject.Instantiate(self.Bullects[self.gunLevel - 1], self.attackPos.position, self.attackPos.rotation * Quaternion.Euler(0, 0, 20))
+            GameObject.Instantiate(self.Bullects[self.gunLevel - 1], self.attackPos.position, self.attackPos.rotation * Quaternion.Euler(0, 0, -20))
         end
         
-        GameObject.Instantiate(self.Bullects[self.gunLevel - 1], self.attackPos.position, self.attackPos.rotation);
+        GameObject.Instantiate(self.Bullects[self.gunLevel - 1], self.attackPos.position, self.attackPos.rotation)
         
         if not self.canShootForFree then
             if self.gunLevel == 3 then
-                self:DiamandsChange(-3);
+                self:DiamandsChange(-3)
             else
-                self:GoldChange(-1 - (self.gunLevel - 1) * 2);
+                self:GoldChange(-1 - (self.gunLevel - 1) * 2)
             end
         end
-        self.attackCD = 0;
-        self.attack = false;
+        self.attackCD = 0
+        self.attack = false
     end
 end
 
 ButterFly_Start = function (self)
-    self.reduceDiamands = 5;
+    self.reduceDiamands = 5
 end
 
 Ice_Start = function (self)
-    self.reduceDiamands = 9;
+    self.reduceDiamands = 9
 end
 
 Fire_Start = function (self)
-    self.reduceDiamands = 7;
+    self.reduceDiamands = 7
 end
 
 Boss_Start = function (self)
-    self:Start();
-    self.m_reduceGold = self.m_reduceGold - 20;
+    self:Start()
+    self.m_reduceGold = self.m_reduceGold - 20
 end
 
 DeffendBoss_Start = function (self)
-    self:Start();
-    self.m_reduceGold = self.m_reduceGold - 30;
+    self:Start()
+    self.m_reduceGold = self.m_reduceGold - 30
 end
 
 InvisibleBoss_Start = function (self)
-    self:Start();
-    self.m_reduceGold = self.m_reduceGold - 5;
+    self:Start()
+    self.m_reduceGold = self.m_reduceGold - 5
 end
 
 Gun_GoldChange = function (self, number)
-    self:GoldChange(number);
+    self:GoldChange(number)
     if self.gold + number < 0 then
-        self.gold = 0;
-        return;
+        self.gold = 0
+        return
     end
 end
 
 Gun_DiamandsChange = function (self, number)
-    self:DiamandsChange(number);
+    self:DiamandsChange(number)
     if self.diamands + number < 0 then
-        self.diamands = 0;
-        return;
+        self.diamands = 0
+        return
     end
 end
 
 CreateFish_Update = function (self)
     
-    self:CreateALotOfFish();
+    self:CreateALotOfFish()
     
     if self.ItemtimeVal >= 0.5 then
         
-        self.num = Mathf.Floor(Random.Range(0, 4));
-        self.ItemNum = Mathf.Floor(Random.Range(1, 101));
+        self.num = Mathf.Floor(Random.Range(0, 4))
+        self.ItemNum = Mathf.Floor(Random.Range(1, 101))
         
         local halfLength = self.fishList.Length / 2
         local littlefishTypeIndex = Mathf.Floor(Random.Range(0, halfLength))
@@ -162,23 +169,23 @@ CreateFish_Update = function (self)
         local itemTypeIndex = Mathf.Floor(Random.Range(0, self.item.Length))
         
         if self.ItemNum < 20 then
-            self:CreateGameObject(self.item[3]);
+            self:CreateGameObject(self.item[3])
         end
         
         if self.ItemNum <= 42 then
             for i = 0, 2, 1 do
-                self:CreateGameObject(self.fishList[littlefishTypeIndex]);
+                self:CreateGameObject(self.fishList[littlefishTypeIndex])
             end
-            self:CreateGameObject(self.item[itemTypeIndex]);
+            self:CreateGameObject(self.item[itemTypeIndex])
         elseif self.ItemNum >= 43 and self.ItemNum < 72 then
             for i = 0, 1, 1 do
-                self:CreateGameObject(self.fishList[bigfishTypeIndex]);
+                self:CreateGameObject(self.fishList[bigfishTypeIndex])
             end
-            self:CreateGameObject(self.item[itemTypeIndex]);
+            self:CreateGameObject(self.item[itemTypeIndex])
             --[[
         elseif self.ItemNum >= 73 and self.ItemNum < 84 then
-            self:CreateGameObject(self.fishList[2]);
-            self:CreateGameObject(self.fishList[5]);
+            self:CreateGameObject(self.fishList[2])
+            self:CreateGameObject(self.fishList[5])
                     --]]
         elseif self.ItemNum >= 84 and self.ItemNum < 86 then
             self:CreateGameObject(self.boss)
@@ -187,28 +194,73 @@ CreateFish_Update = function (self)
         elseif self.ItemNum == 100 then
             self:CreateGameObject(self.boss3)
         else
-            self:CreateGameObject(self.item[0]);
+            self:CreateGameObject(self.item[0])
         end
-        self.ItemtimeVal = 0;
+        self.ItemtimeVal = 0
     else
-        self.ItemtimeVal = self.ItemtimeVal + Time.deltaTime;
+        self.ItemtimeVal = self.ItemtimeVal + Time.deltaTime
     end
 end
 
 Fish_TakeDamage = function (self, attackValue)
     if CS.Gun.Instance.Fire then
-        attackValue = 2 * attackValue;
+        attackValue = 2 * attackValue
     end
-    local catchValue = Mathf.Floor(Random.Range(0, 100));
+    local catchValue = Mathf.Floor(Random.Range(0, 100))
     
     if catchValue <= (50 - (self.hp - attackValue)) / 2 then
         
-        self.isDead = true;
+        self.isDead = true
         for i = 0, 8, 1 do
-            GameObject.Instantiate(self.pao, self.transform.position, Quaternion.Euler(self.transform.eulerAngles + Vector3(0, 45 * i, 0)));
+            GameObject.Instantiate(self.pao, self.transform.position, Quaternion.Euler(self.transform.eulerAngles + Vector3(0, 45 * i, 0)))
         end
         
-        self.gameObjectAni:SetTrigger("Die");
-        self:Invoke("Prize", 0.7);
+        self.gameObjectAni:SetTrigger("Die")
+        self:Invoke("Prize", 0.7)
     end
+end
+
+Boss_TakeDamage = function (self, attackValue)
+    
+    if CS.Gun.Instance.Fire then
+        attackValue = 2 * attackValue
+    end
+    
+    local catchValue = Mathf.Floor(Random.Range(0, 100))
+    
+    self.hp = self.hp - attackValue
+    if self.hp <= attackValue * 3 - self.hp / 10 then
+        self.Instantiate(self.deadEeffect, self.transform.position, self.transform.rotation)
+        CS.Gun.Instance.GoldChange(self.GetGold * 10)
+        CS.Gun.Instance.DiamandsChange(self.GetDiamands * 10)
+        
+        for i = 0, 10, 1 do
+            local itemGo = self:Instantiate(self.gold, self.transform.position, Quaternion.Euler(self.transform.eulerAngles + Vector3(0, 18 + 36 * (i - 1), 0)))
+            itemGo:GetComponent('Gold').bossPrize = true
+        end
+        
+        for o = 0, 10, 1 do
+            local itemGo = self:Instantiate(self.diamands, self.transform.position, Quaternion.Euler(self.transform.eulerAngles + Vector3(0, 36 + 36 * (i - 1), 0)))
+            itemGo:GetComponent('Gold').bossPrize = true
+        end
+        self.Destroy(self.gameObject)
+    end
+end
+
+Gun_RotateGun = function (self)
+    if UnityEngine.Input.GetKey(UnityEngine.KeyCode.A) then
+        self.transform:Rotate(UnityEngine.Vector3.forward * self.rotateSpeed)
+    elseif UnityEngine.Input.GetKey(UnityEngine.KeyCode.D) then
+        self.transform:Rotate(-UnityEngine.Vector3.forward * self.rotateSpeed)
+    end
+    self:ClampAngle()
+end
+
+GunImage_RotateGun = function(self)
+    if UnityEngine.Input.GetKey(UnityEngine.KeyCode.A) then
+        self.transform:Rotate(UnityEngine.Vector3.forward * self.rotateSpeed)
+    elseif UnityEngine.Input.GetKey(UnityEngine.KeyCode.D) then
+        self.transform:Rotate(-UnityEngine.Vector3.forward * self.rotateSpeed)
+    end
+    self:ClampAngle()
 end

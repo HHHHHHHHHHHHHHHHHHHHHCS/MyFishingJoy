@@ -146,7 +146,7 @@ public class Gun : MonoBehaviour
 
 
     //旋转枪
-
+    [LuaCallCSharp]
     private void RotateGun()
     {
 
