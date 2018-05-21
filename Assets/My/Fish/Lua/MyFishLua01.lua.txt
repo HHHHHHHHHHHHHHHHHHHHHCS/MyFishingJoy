@@ -8,6 +8,9 @@ local Mathf = UnityEngine.Mathf
 local Time = UnityEngine.Time
 local Random = UnityEngine.Random
 
+local level3fish3, seawave
+local canCreateNewFish = true, changeMapTimeVal = 0
+
 function HotFix(isHotfix)
     
     --1.1.1 点击宝箱的金币钻石太拥挤分散一点
@@ -58,10 +61,22 @@ function HotFix(isHotfix)
     xlua.hotfix(CS.Fish, 'TakeDamage', isHotfix and Fish_TakeDamage or nil)
     xlua.hotfix(CS.Boss, 'TakeDamage', isHotfix and Boss_TakeDamage or nil)
     
-    -- 1.4.2 炮台移动是根据鼠标的水平数值滑动来模拟跟随的，改为玩家按下ad键来旋转炮台
+    --1.4.2 炮台移动是根据鼠标的水平数值滑动来模拟跟随的，改为玩家按下ad键来旋转炮台
     xlua.hotfix(CS.Gun, 'RotateGun', isHotfix and Gun_RotateGun or nil)
     xlua.private_accessible(CS.GunImage)
     xlua.hotfix(CS.GunImage, 'RotateGun', isHotfix and GunImage_RotateGun or nil)
+    
+    --2.0 新的鱼的添加
+    level3fish3 = CS.MyFishLua01.LoadResource('level3fish3', 'AssetBundles/gameobject/enemy.ab')
+    
+    --2.0 海浪的添加
+    xlua.private_accessible(CS.MyHotfixEmpty)
+    seawave = CS.MyFishLua01.LoadResource('seawave', 'AssetBundles/gameobject/seawave.ab')
+    xlua.hotfix(CS.MyHotfixEmpty, 'Start', isHotfix and MyHotfixEmpty_Start or nil)
+    xlua.hotfix(CS.MyHotfixEmpty, 'Update', isHotfix and MyHotfixEmpty_Update or nil)
+    xlua.hotfix(CS.MyHotfixEmpty, 'OnTriggerEnter', isHotfix and MyHotfixEmpty_OnTriggerEnter or nil)
+    xlua.hotfix(CS.MyHotfixEmpty, 'BehaviourMethod_01', isHotfix and MyHotfixEmpty_BehaviourMethod_01 or nil)
+    
 end
 
 Treasour_CreatePrize = function (self)
@@ -156,6 +171,18 @@ end
 
 CreateFish_Update = function (self)
     
+    if canCreateNewFish then
+        if changeMapTimeVal >= 60 then
+            local go = GameObject.Instantiate(seawave)
+            canCreateNewFish = false
+            changeMapTimeVal = 0
+        else
+        	changeMapTimeVal=changeMapTimeVal+Time.deltaTime
+        end
+    else
+        return
+    end
+    
     self:CreateALotOfFish()
     
     if self.ItemtimeVal >= 0.5 then
@@ -182,11 +209,9 @@ CreateFish_Update = function (self)
                 self:CreateGameObject(self.fishList[bigfishTypeIndex])
             end
             self:CreateGameObject(self.item[itemTypeIndex])
-            --[[
+            --2.0 新的鱼的添加
         elseif self.ItemNum >= 73 and self.ItemNum < 84 then
-            self:CreateGameObject(self.fishList[2])
-            self:CreateGameObject(self.fishList[5])
-                    --]]
+            self:CreateGameObject(level3fish3)
         elseif self.ItemNum >= 84 and self.ItemNum < 86 then
             self:CreateGameObject(self.boss)
         elseif self.ItemNum >= 87 and self.ItemNum <= 88 then
@@ -263,4 +288,27 @@ GunImage_RotateGun = function(self)
         self.transform:Rotate(-UnityEngine.Vector3.forward * self.rotateSpeed)
     end
     self:ClampAngle()
+end
+
+MyHotfixEmpty_Start = function (self)
+    self:Invoke('MyHotfixEmpty_BehaviourMethod_01', 8);
+end
+
+MyHotfixEmpty_Update = function (self)
+    self.transform:Translate(4 * Vector3.left * Time.deltaTime, UnityEngine.Space.World)
+end
+
+MyHotfixEmpty_OnTriggerEnter = function (self, other)
+    if other.tag ~= 'Untagged' and other.tag ~= 'Wall' then
+        GameObject.Destroy(other.gameobject);
+    end
+end
+
+MyHotfixEmpty_BehaviourMethod_01 = function (self)
+    local gun = CS.Gun.Instance
+    local gunLevel = gun.level + 1
+    gun.level = gunLevel % 4 == 0 and gunLevel or 1
+    canCreateNewFish = true
+    CS.Gun.changeAudio = true
+    GameObject.Destroy(self.gameobject)
 end

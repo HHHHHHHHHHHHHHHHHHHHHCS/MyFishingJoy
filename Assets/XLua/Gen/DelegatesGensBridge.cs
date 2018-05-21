@@ -98,7 +98,35 @@ namespace XLua
 #endif
 		}
         
-		public void __Gen_Delegate_Imp3(object p0, int p1)
+		public void __Gen_Delegate_Imp3(object p0, object p1)
+		{
+#if THREAD_SAFE || HOTFIX_ENABLE
+            lock (luaEnv.luaEnvLock)
+            {
+#endif
+                RealStatePtr L = luaEnv.rawL;
+                int err_func =LuaAPI.load_error_func(L, errorFuncRef);
+                ObjectTranslator translator = luaEnv.translator;
+                
+                LuaAPI.lua_getref(L, luaReference);
+                
+                translator.PushAny(L, p0);
+                translator.PushAny(L, p1);
+                
+                int __gen_error = LuaAPI.lua_pcall(L, 2, 0, err_func);
+                if (__gen_error != 0)
+                    luaEnv.ThrowExceptionFromError(err_func - 1);
+                
+                
+                
+                LuaAPI.lua_settop(L, err_func - 1);
+                
+#if THREAD_SAFE || HOTFIX_ENABLE
+            }
+#endif
+		}
+        
+		public void __Gen_Delegate_Imp4(object p0, int p1)
 		{
 #if THREAD_SAFE || HOTFIX_ENABLE
             lock (luaEnv.luaEnvLock)
@@ -126,7 +154,7 @@ namespace XLua
 #endif
 		}
         
-		public void __Gen_Delegate_Imp4(object p0, int p1, int p2)
+		public void __Gen_Delegate_Imp5(object p0, int p1, int p2)
 		{
 #if THREAD_SAFE || HOTFIX_ENABLE
             lock (luaEnv.luaEnvLock)
@@ -143,34 +171,6 @@ namespace XLua
                 LuaAPI.xlua_pushinteger(L, p2);
                 
                 int __gen_error = LuaAPI.lua_pcall(L, 3, 0, err_func);
-                if (__gen_error != 0)
-                    luaEnv.ThrowExceptionFromError(err_func - 1);
-                
-                
-                
-                LuaAPI.lua_settop(L, err_func - 1);
-                
-#if THREAD_SAFE || HOTFIX_ENABLE
-            }
-#endif
-		}
-        
-		public void __Gen_Delegate_Imp5(object p0, object p1)
-		{
-#if THREAD_SAFE || HOTFIX_ENABLE
-            lock (luaEnv.luaEnvLock)
-            {
-#endif
-                RealStatePtr L = luaEnv.rawL;
-                int err_func =LuaAPI.load_error_func(L, errorFuncRef);
-                ObjectTranslator translator = luaEnv.translator;
-                
-                LuaAPI.lua_getref(L, luaReference);
-                
-                translator.PushAny(L, p0);
-                translator.PushAny(L, p1);
-                
-                int __gen_error = LuaAPI.lua_pcall(L, 2, 0, err_func);
                 if (__gen_error != 0)
                     luaEnv.ThrowExceptionFromError(err_func - 1);
                 
