@@ -6,25 +6,25 @@ using XLua;
 [Hotfix]
 public class MyHotfixEmpty : MonoBehaviour
 {
-    [LuaCallCSharp]
+
     private void Start()
     {
-        
+
     }
 
-    [LuaCallCSharp]
+
     private void Update()
     {
-        
+
     }
 
-    [LuaCallCSharp]
+
     private void OnTriggerEnter(Collider other)
     {
 
     }
 
-    [LuaCallCSharp]
+
     private void BehaviourMethod_01()
     {
 

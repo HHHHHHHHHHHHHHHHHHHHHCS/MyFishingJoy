@@ -9,7 +9,8 @@ local Time = UnityEngine.Time
 local Random = UnityEngine.Random
 
 local level3fish3, seawave
-local canCreateNewFish = true, changeMapTimeVal = 0
+local canCreateNewFish = true
+local changeMapTimeVal = 0
 
 function HotFix(isHotfix)
     
@@ -171,13 +172,14 @@ end
 
 CreateFish_Update = function (self)
     
+    --2.0 海浪
     if canCreateNewFish then
         if changeMapTimeVal >= 60 then
             local go = GameObject.Instantiate(seawave)
             canCreateNewFish = false
             changeMapTimeVal = 0
         else
-        	changeMapTimeVal=changeMapTimeVal+Time.deltaTime
+        	changeMapTimeVal=changeMapTimeVal+0.1--Time.deltaTime
         end
     else
         return
@@ -291,7 +293,7 @@ GunImage_RotateGun = function(self)
 end
 
 MyHotfixEmpty_Start = function (self)
-    self:Invoke('MyHotfixEmpty_BehaviourMethod_01', 8);
+    self:Invoke('BehaviourMethod_01', 8);
 end
 
 MyHotfixEmpty_Update = function (self)
@@ -300,7 +302,8 @@ end
 
 MyHotfixEmpty_OnTriggerEnter = function (self, other)
     if other.tag ~= 'Untagged' and other.tag ~= 'Wall' then
-        GameObject.Destroy(other.gameobject);
+
+        GameObject.Destroy(other.gameObject);
     end
 end
 
@@ -309,6 +312,6 @@ MyHotfixEmpty_BehaviourMethod_01 = function (self)
     local gunLevel = gun.level + 1
     gun.level = gunLevel % 4 == 0 and gunLevel or 1
     canCreateNewFish = true
-    CS.Gun.changeAudio = true
+    CS.Gun.Instance.changeAudio = true
     GameObject.Destroy(self.gameobject)
 end
