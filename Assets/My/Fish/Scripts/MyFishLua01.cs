@@ -11,6 +11,7 @@ public class MyFishLua01 : MonoBehaviour
     private const string fileDir = "My/Fish/Lua";
     private const string filePath = "MyFishLua01.lua.txt";
     private const string webPath = @"http://127.0.0.1/MyFishingJoy/";
+    private const string savePath = "Hotfix.lua.txt";
 
     private LuaEnv luaEnv;
 
@@ -116,16 +117,27 @@ public class MyFishLua01 : MonoBehaviour
 
     private IEnumerator LoadLuaCorotine()
     {
-        UnityWebRequest uwr = UnityWebRequest.Get(webPath + "MyFishLua01.lua.txt");
-        yield return uwr.SendWebRequest();
+        if(File.Exists(savePath))
+        {
+            luaEnv.DoString(File.ReadAllText(savePath));
+        }
+        else
+        {
+            UnityWebRequest uwr = UnityWebRequest.Get(webPath + "MyFishLua01.lua.txt");
+            yield return uwr.SendWebRequest();
+            luaEnv.DoString(uwr.downloadHandler.text);
+            File.WriteAllText(savePath, uwr.downloadHandler.text);
+        }
+
         //luaEnv.AddLoader((ref string filepath) =>
         //{
         //    byte[] bytes = System.Text.Encoding.UTF8.GetBytes(uwr.downloadHandler.text);
         //    return bytes;
         //});
-        luaEnv.DoString(uwr.downloadHandler.text);
+  
         //luaEnv.DoString("require 'MyFishLua01';");
         luaEnv.DoString("HotFix(true)");
+
     }
 
     //网络的

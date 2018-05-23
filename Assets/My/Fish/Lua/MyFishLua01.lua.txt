@@ -257,7 +257,7 @@ CreateFish_Update = function (self)
             canCreateNewFish = false
             changeMapTimeVal = 0
         else
-            changeMapTimeVal = changeMapTimeVal + 0.1--Time.deltaTime
+            changeMapTimeVal = changeMapTimeVal + Time.deltaTime
         end
     else
         return
